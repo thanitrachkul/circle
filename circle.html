@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เว็บแอปแสดงคุณสมบัติวงกลม</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Google Fonts: Inter and Sarabun for Thai -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+        }
+        /* Custom styles for the range slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #d3dce6;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #3b82f6; /* blue-500 */
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #3b82f6;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Card Container -->
+    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-lg p-6 md:p-10 mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-800">เครื่องมือแสดงภาพและคำนวณวงกลม</h1>
+            <p class="text-slate-500 mt-2">ปรับค่ารัศมีและตำแหน่งเพื่อดูการเปลี่ยนแปลงของวงกลมและผลการคำนวณแบบเรียลไทม์</p>
+            <!-- Equation Display -->
+            <div class="mt-6 bg-slate-50 py-4 rounded-lg border">
+                <h2 class="text-lg font-bold text-slate-700">สมการวงกลม</h2>
+                <p id="circleEquation" class="text-xl md:text-2xl font-bold text-indigo-600 font-mono tracking-wide mt-1">
+                    x<sup>2</sup> + y<sup>2</sup> = 2500
+                </p>
+            </div>
+        </header>
+
+        <main class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <!-- Left Column: Controls and Information -->
+            <div class="flex flex-col space-y-6">
+                <!-- Radius Controller -->
+                <div>
+                    <label for="radiusSlider" class="block font-bold text-lg text-slate-700 mb-2">กำหนดค่ารัศมี (Radius)</label>
+                    <input id="radiusSlider" type="range" min="10" max="100" value="50" class="w-full cursor-pointer">
+                    <div class="text-center mt-3 text-slate-600 font-medium">
+                        ค่ารัศมีปัจจุบัน: <span id="radiusValue" class="font-bold text-blue-600 text-xl">50</span> หน่วย
+                    </div>
+                </div>
+                
+                <!-- Position Controllers -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="xInput" class="block font-bold text-slate-700 mb-2">ตำแหน่งแกน X</label>
+                        <input id="xInput" type="number" value="0" min="-50" max="50" class="w-full p-2 border border-slate-300 rounded-md text-center">
+                    </div>
+                    <div>
+                        <label for="yInput" class="block font-bold text-slate-700 mb-2">ตำแหน่งแกน Y</label>
+                        <input id="yInput" type="number" value="0" min="-50" max="50" class="w-full p-2 border border-slate-300 rounded-md text-center">
+                    </div>
+                </div>
+
+
+                <!-- Calculation Results -->
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 space-y-6">
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-2">ผลการคำนวณ</h2>
+                    <!-- Diameter & Circumference -->
+                    <div class="grid grid-cols-2 gap-4">
+                         <div>
+                            <h3 class="font-bold text-md text-slate-700">เส้นผ่านศูนย์กลาง</h3>
+                            <p class="text-sm text-slate-500 font-mono">d = 2r</p>
+                            <p class="mt-1 text-lg">
+                                <span id="diameterResult" class="font-bold text-green-600">100</span> หน่วย
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-md text-slate-700">เส้นรอบวง</h3>
+                            <p class="text-sm text-slate-500 font-mono">C = 2πr</p>
+                            <p class="mt-1 text-lg">
+                                <span id="circumferenceResult" class="font-bold text-purple-600">314</span> หน่วย
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Visualization -->
+            <div class="w-full aspect-square bg-slate-50 rounded-xl flex items-center justify-center p-2 border-2 border-slate-200">
+                <svg id="circleCanvas" class="w-full h-full" viewBox="-120 -120 240 240" preserveAspectRatio="xMidYMid meet">
+                    <!-- Grid Definition -->
+                    <defs>
+                        <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgb(226, 232, 240)" stroke-width="0.5"/>
+                        </pattern>
+                    </defs>
+                    <rect x="-120" y="-120" width="240" height="240" fill="url(#grid)" />
+
+                    <!-- Axes -->
+                    <line x1="-120" y1="0" x2="120" y2="0" class="stroke-slate-400" stroke-width="1"/>
+                    <line x1="0" y1="-120" x2="0" y2="120" class="stroke-slate-400" stroke-width="1"/>
+                    <text x="110" y="-4" class="fill-slate-500 text-xs font-sans">X</text>
+                    <text x="4" y="-110" class="fill-slate-500 text-xs font-sans">Y</text>
+
+                    <!-- Circle Group: All circle elements are moved together by this group's transform -->
+                    <g id="circleGroup">
+                        <!-- Circle drawing -->
+                        <circle id="mainCircle" cx="0" cy="0" r="50" class="stroke-blue-500 fill-blue-100 transition-all duration-200" stroke-width="2" fill-opacity="0.6"/>
+                        
+                        <!-- Path for circumference text to follow -->
+                        <path id="textCirclePath" fill="none" stroke="none" d="M -60, 0 a 60,60 0 1,1 120,0 a 60,60 0 1,1 -120,0"></path>
+
+                        <!-- Diameter line -->
+                        <line id="diameterLine" x1="-50" y1="0" x2="50" y2="0" class="stroke-red-500 transition-all duration-200" stroke-width="2" stroke-dasharray="4"/>
+                        <!-- Radius line -->
+                        <line id="radiusLine" x1="0" y1="0" x2="50" y2="0" class="stroke-green-600 transition-all duration-200" stroke-width="2"/>
+                        <!-- Center point -->
+                        <circle cx="0" cy="0" r="3" class="fill-slate-700"/>
+
+                        <!-- Text labels on the SVG -->
+                        <text id="diameterText" x="0" y="-8" class="fill-red-600 font-bold" font-size="8" text-anchor="middle">d = 100</text>
+                        <text id="radiusText" x="25" y="12" class="fill-green-700 font-bold" font-size="8" text-anchor="middle">r = 50</text>
+                        
+                        <text class="font-bold fill-purple-700" font-size="8">
+                            <textPath id="circumferenceTextPath" href="#textCirclePath" startOffset="50%" text-anchor="middle">
+                                C = 314
+                            </textPath>
+                        </text>
+                    </g>
+                </svg>
+            </div>
+        </main>
+        
+        <!-- Footer with developer credit -->
+        <footer class="text-center mt-8 text-slate-500 text-sm">
+            <p>พัฒนาโดย: นายธนิท ธนพัตนิรัชกุล</p>
+        </footer>
+    </div>
+
+    <script>
+        // Get references to all the necessary HTML elements
+        const radiusSlider = document.getElementById('radiusSlider');
+        const xInput = document.getElementById('xInput');
+        const yInput = document.getElementById('yInput');
+
+        const radiusValue = document.getElementById('radiusValue');
+        const diameterResult = document.getElementById('diameterResult');
+        const circumferenceResult = document.getElementById('circumferenceResult');
+        
+        const circleGroup = document.getElementById('circleGroup'); // The <g> element
+        const mainCircle = document.getElementById('mainCircle');
+        const diameterLine = document.getElementById('diameterLine');
+        const radiusLine = document.getElementById('radiusLine');
+        
+        const radiusText = document.getElementById('radiusText');
+        const diameterText = document.getElementById('diameterText');
+        const circumferenceTextPath = document.getElementById('circumferenceTextPath');
+        const textCirclePath = document.getElementById('textCirclePath');
+        const circleEquation = document.getElementById('circleEquation');
+
+        /**
+         * This function is called whenever any input value changes.
+         * It recalculates properties and updates the DOM.
+         */
+        function updateVisualization() {
+            // 1. Get current values from all inputs
+            const radius = parseInt(radiusSlider.value, 10);
+            const xPos = parseInt(xInput.value, 10) || 0; // Default to 0 if input is invalid
+            const yPos = parseInt(yInput.value, 10) || 0;
+
+            // 2. Update text displays for radius
+            radiusValue.textContent = radius;
+
+            // 3. Perform calculations
+            const diameter = 2 * radius;
+            const circumference = 2 * Math.PI * radius;
+            const radiusSquared = radius * radius;
+
+            // 4. Update SVG visualization
+            
+            // A. Move the entire circle group to the new position
+            // We multiply yPos by -1 because SVG's Y-axis is inverted (0 is at the top).
+            circleGroup.setAttribute('transform', `translate(${xPos}, ${yPos * -1})`);
+            
+            // B. Update the size of elements based on the new radius
+            mainCircle.setAttribute('r', radius);
+            diameterLine.setAttribute('x1', -radius);
+            diameterLine.setAttribute('x2', radius);
+            radiusLine.setAttribute('x2', radius);
+            
+            // 5. Update text labels on the SVG
+            radiusText.setAttribute('x', radius / 2);
+            radiusText.textContent = `r = ${radius}`;
+            diameterText.textContent = `d = ${diameter}`;
+
+            const textPathRadius = radius + 10;
+            const newPathData = `M -${textPathRadius}, 0 a ${textPathRadius},${textPathRadius} 0 1,1 ${textPathRadius * 2},0 a ${textPathRadius},${textPathRadius} 0 1,1 -${textPathRadius * 2},0`;
+            textCirclePath.setAttribute('d', newPathData);
+            circumferenceTextPath.textContent = `C = ${Math.round(circumference)}`;
+
+            // 6. Update the result text
+            diameterResult.textContent = diameter;
+            circumferenceResult.textContent = Math.round(circumference);
+
+            // 7. Update the main circle equation display
+            // (x - h)^2 + (y - k)^2 = r^2
+            let xPart, yPart;
+
+            if (xPos === 0) {
+                xPart = 'x<sup>2</sup>';
+            } else {
+                const hStr = xPos > 0 ? `- ${xPos}` : `+ ${-xPos}`;
+                xPart = `(x ${hStr})<sup>2</sup>`;
+            }
+
+            if (yPos === 0) {
+                yPart = 'y<sup>2</sup>';
+            } else {
+                const kStr = yPos > 0 ? `- ${yPos}` : `+ ${-yPos}`;
+                yPart = `(y ${kStr})<sup>2</sup>`;
+            }
+
+            circleEquation.innerHTML = `${xPart} + ${yPart} = ${radiusSquared}`;
+        }
+
+        // Add event listeners to all controls
+        radiusSlider.addEventListener('input', updateVisualization);
+        xInput.addEventListener('input', updateVisualization);
+        yInput.addEventListener('input', updateVisualization);
+
+        // Call the function once on page load to initialize the view
+        window.addEventListener('load', updateVisualization);
+
+    </script>
+</body>
+</html>
+
